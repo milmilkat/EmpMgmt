@@ -44,8 +44,9 @@ under
             _context.Update(emp);
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetEmp", new { id = emp.Id }, emp);
-15. Copy the JQuery texts from Index in Pages to your Index
 
-16. Change the links of your JQuery file
+15. Then change the names from Emp to your own table
 
-        }
+16. Copy the JQuery texts from Index in Pages to your Index
+
+17. Change the links of your JQuery file
