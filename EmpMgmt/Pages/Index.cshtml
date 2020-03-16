@@ -1,0 +1,425 @@
+﻿@page
+@{}
+<!DOCTYPE html>
+
+<!--  First JQuery Template   -->
+<!--
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Bikes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body style="background-size: cover;  background-image : url('/images/bg.jpg')">
+
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-warning">
+            <a class="navbar-brand" href="#">Bikes</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <button class="btn btn-outline-dark" data-toggle="modal" data-target="#addBikes">Add New Bike</button>
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
+
+
+        <div class="container">
+            <div class="row" id="allBikes">
+            </div>
+
+        </div>
+    </div>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        var uri = 'api/GetEmp';
+        $(document).ready(function () {
+            // Gets all Bikes
+            $.getJSON(uri)
+                .done(function (data) {
+                    $("#BikesTemplate").tmpl(data).appendTo("#allBikes");
+                });
+        });
+        function getAllBikes() {
+            $.getJSON(uri)
+                .done(function (data) {
+                    $("#allBikes").text("");
+                    $("#BikesTemplate").tmpl(data).appendTo("#allBikes");
+                });
+        }
+        function addBikes() {
+            var _model = $('#Name').val();
+            var _maker = $('#Name').val();
+            var _price = parseFloat($('#Name').val());
+            var Bike = {
+                model: _model,
+                maker: _maker,
+                bike_Price: _price
+            };
+            $.ajax({
+                type: "POST",
+                url: uri,
+                data: JSON.stringify(Bike),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#result").html("Success");
+                getAllBikes();
+            }).fail(function (jqXHR, textStatus) {
+                $("#result").html("An error occured when Adding the bike record.");
+            });
+        }
+        function updateBike() {
+            var _model = $('#_model').val();
+            var _maker = $('#_maker').val();
+            var _price = parseFloat($('#_bike_Price').val());
+            var Bike = {
+                bike_Id: parseInt($('#_id').val()),
+                model: _model,
+                maker: _maker,
+                bike_price: _price
+            };
+            $.ajax({
+                type: "PUT",
+                url: uri + "/" + $('#_id').val(),
+                data: JSON.stringify(Bike),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#resultUpdate").html("Success");
+                getAllBikes();
+            }).fail(function (jqXHR, textStatus) {
+                $("#resultUpdate").html("An error occured When updating Bike");
+            });;
+        }
+        function remove(id) {
+            var yes = confirm("Are you sure you want to delete this Bike?");
+            if (yes) {
+                $.ajax({
+                    type: "DELETE",
+                    url: uri + "/" + id,
+                }).done(function (response) {
+                    getAllBikes();
+                });
+            }
+        }
+        function getBikeForUpdate(id) {
+            $.ajax({
+                type: "GET",
+                url: uri + "/" + id,
+                contentType: "application/json"
+            }).done(function (response) {
+                $('#_id').val(response.bike_Id);
+                $('#_model').val(response.model);
+                $('#_maker').val(response.maker);
+                $('#_bike_Price').val(response.bike_Price);
+            });
+        }
+    </script>
+
+
+
+    <script id="BikesTemplate" type="text/x-jquery-tmpl">
+        <div class="col-lg-3" style="margin:10px;">
+            <div class="empd empd text-white bg-dark border-warning mb-3" style="width: 18rem; padding:20px">
+                <div class="empd-body">
+                    <h5 class="empd-title">Model: ${model}</h5>
+                    <p class="empd-text">Maker :  ${maker}</p>
+                    <p class="empd-text">Price : ${bike_Price}</p>
+                </div>
+                <span>
+                    <button class="btn btn-primary" onclick="getBikeForUpdate('${bike_Id}')" data-toggle="modal" data-target="#updateBike">Update</button>
+                    <a href="#" class="btn btn-danger" onclick="remove('${bike_Id}')">Delete</a>
+                </span>
+            </div>
+        </div>
+    </script>
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="addBikes">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Bike</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="model">Model</label>
+                            <input type="text" class="form-control" id="Name" aria-describedby="modelHelp" placeholder="Model Name">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Maker</label>
+                            <input type="text" class="form-control" id="Name" aria-describedby="makerHelp" placeholder="Maker Name">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Bike Price</label>
+                            <input type="number" class="form-control" id="Name" aria-describedby="PriceHelp" placeholder="Bike Price">
+
+                        </div>
+
+
+                        <div class="form-group" id="result">
+
+
+                        </div>
+                        <button type="button" onclick="addBikes()" class="btn btn-primary">Add Bikes</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="updateBike">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Bike</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+                        <div class="form-group">
+
+                            <input type="hidden" class="form-control" id="_id" aria-describedby="emailHelp">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Model</label>
+                            <input type="text" class="form-control" id="_model" aria-describedby="modelHelp" placeholder="Model Name">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Maker</label>
+                            <input type="text" class="form-control" id="_maker" aria-describedby="makerHelp" placeholder="Maker Name">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Bike Price</label>
+                            <input type="number" class="form-control" id="_bike_Price" aria-describedby="PriceHelp" placeholder="Bike Price">
+
+                        </div>
+
+
+                        <div class="form-group" id="resultUpdate">
+
+
+                        </div>
+                        <button type="button" onclick="updateBike()" class="btn btn-primary">Update Record</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+    -->
+
+<!-- Second JQuery Template   -->
+
+<html>
+<head>
+    <title>SmartIT emp Manager</title>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            getempList();
+        });
+
+        var emp = {
+            id: 0,
+            name: ""
+        }
+
+        // Get all emps to display
+        function getempList() {
+            // Call Web API to get a list of emps
+            $.ajax({
+                url: '/api/GetEmp',
+                type: 'GET',
+                dataType: 'json',
+                success: function (emps) {
+                    empListSuccess(emps);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        // Display all emps returned from Web API call
+        function empListSuccess(emps) {
+            // Iterate over the collection of data
+            $("#empTable tbody").remove();
+            $.each(emps, function (index, emp) {
+                // Add a row to the emp table
+                empAddRow(emp);
+            });
+        }
+
+        // Add emp row to <table>
+        function empAddRow(emp) {
+            // First check if a <tbody> tag exists, add one if not
+            if ($("#empTable tbody").length == 0) {
+                $("#empTable").append("<tbody></tbody>");
+            }
+
+            // Append row to <table>
+            $("#empTable tbody").append(
+                empBuildTableRow(emp));
+        }
+
+        // Build a <tr> for a row of table data
+        function empBuildTableRow(emp) {
+            var newRow = "<tr>" +
+                "<td>" + emp.id + "</td>" +
+                "<td><input   class='input-name' type='text' value='" + emp.name + "'/></td>" +
+                "<td>" +
+                "<button type='button' " +
+                "onclick='empUpdate(this);' " +
+                "class='btn btn-default' " +
+                "data-id='" + emp.id + "' " +
+                "data-name='" + emp.name + "' " +
+                ">" +
+                "<span class='glyphicon glyphicon-edit' /> Update" +
+                "</button> " +
+                " <button type='button' " +
+                "onclick='empDelete(this);'" +
+                "class='btn btn-default' " +
+                "data-id='" + emp.id + "'>" +
+                "<span class='glyphicon glyphicon-remove' />Delete" +
+                "</button>" +
+                "</td>" +
+                "</tr>";
+
+            return newRow;
+        }
+
+        function onAddemp(item) {
+            var options = {};
+            options.url = "/api/AddEmp";
+            options.type = "POST";
+            var obj = emp;
+            obj.name = $("#name").val();
+            console.dir(obj);
+            options.data = JSON.stringify(obj);
+            options.contentType = "application/json";
+            options.dataType = "html";
+
+            options.success = function (msg) {
+                getempList();
+                $("#msg").html(msg);
+            },
+                options.error = function () {
+                    $("#msg").html("Error while calling the Web API!");
+                };
+            $.ajax(options);
+        }
+
+        function empUpdate(item) {
+            var id = $(item).data("id");
+            var options = {};
+            options.url = "/api/UpdateEmp/"
+            options.type = "PUT";
+
+            var obj = emp;
+            obj.id = $(item).data("id");
+            obj.name = $(".input-name", $(item).parent().parent()).val();
+            console.dir(obj);
+            options.data = JSON.stringify(obj);
+            options.contentType = "application/json";
+            options.dataType = "html";
+            options.success = function (msg) {
+                $("#msg").html(msg);
+            };
+            options.error = function () {
+                $("#msg").html("Error while calling the Web API!");
+            };
+            $.ajax(options);
+        }
+
+        function empDelete(item) {
+            var id = $(item).data("id");
+            var options = {};
+            options.url = "/api/DeleteEmp/"
+                + id;
+            options.type = "DELETE";
+            options.dataType = "html";
+            options.success = function (msg) {
+                console.log('msg= ' + msg);
+                $("#msg").html(msg);
+                getempList();
+            };
+            options.error = function () {
+                $("#msg").html("Error while calling the Web API!");
+            };
+            $.ajax(options);
+        }
+
+        // Handle exceptions from AJAX calls
+        function handleException(request, message, error) {
+            var msg = "";
+            msg += "Code: " + request.status + "\n";
+            msg += "Text: " + request.statusText + "\n";
+            if (request.responseJSON != null) {
+                msg += "Message" + request.responseJSON.Message + "\n";
+            }
+
+            alert(msg);
+        }
+    </script>
+</head>
+<body>
+    <h3>emp Manager</h3>
+    <form>
+        <table id="empTable" style="border: 1px solid #999" cellpadding="1">
+            <thead>
+                <tr>
+                    <td>Id </td>
+                    <td> Name </td>
+                    <td> </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input id="name" type="text" /></td>
+                    <td><input type="button" id="insert" value="Insert" onclick='onAddemp(this)' /></td>
+            </thead>
+        </table>
+        <br />
+        <div id="msg"></div>
+    </form>
+    Copyright 2017 (c) SmartIT. All rights reserved. By John Kocer
+</body>
+</html>
